@@ -6,7 +6,7 @@ require 'thor'
 
 module CoinPrice
   class CLI < Thor
-    desc 'Get coin price by ids', 'xxx'
+    desc 'Get coin price by ids', 'coin_price get bitcoin'
     def get(*ids)
       prices = client.price(ids)
       prices.each_key do |coin|
@@ -14,17 +14,35 @@ module CoinPrice
       end
     end
 
-    desc 'List all supported coins', 'xxx'
+    desc 'List all supported coins', 'coin_price list'
     def list
-      client.coins_list.each do |coin_info|
-        puts "[#{coin_info['symbol']}] - #{coin_info['id']}"
+      all_coins.each do |coin_info|
+        print_coin_info(coin_info)
       end
+    end
+
+    desc 'Search coin list', 'coin_price search doge'
+    def search(term)
+      results = all_coins.select do |coin_info|
+        coin_info['id'].include?(term) ||
+          coin_info['symbol'].include?(term) ||
+          coin_info['name'].include?(term)
+      end
+      results.each { |coin_info| print_coin_info(coin_info) }
     end
 
     private
 
+    def print_coin_info(coin_info)
+      puts "[#{coin_info['symbol']}] - #{coin_info['id']}"
+    end
+
     def client
       @client ||= CoingeckoRuby::Client.new
+    end
+
+    def all_coins
+      @all_coins ||= client.coins_list
     end
   end
 end
