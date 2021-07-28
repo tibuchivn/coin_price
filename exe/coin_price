@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require "coin_price/cli"
+CoinPrice::CLI.start(ARGV)
