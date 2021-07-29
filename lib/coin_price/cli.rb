@@ -8,6 +8,9 @@ module CoinPrice
   class CLI < Thor
     desc 'Get coin price by ids', 'coin_price get bitcoin'
     def get(*ids)
+      if ids.empty?
+        ids = ENV['COIN_PRICE'] || ['bitcoin']
+      end
       prices = client.price(ids)
       prices.each_key do |coin|
         puts "#{coin}: #{prices[coin]['usd']}"
