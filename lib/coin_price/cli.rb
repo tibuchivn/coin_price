@@ -8,9 +8,8 @@ module CoinPrice
   class CLI < Thor
     desc 'Get coin price by ids', 'coin_price get bitcoin'
     def get(*ids)
-      if ids.empty?
-        ids = ENV['COIN_PRICE'] || ['bitcoin']
-      end
+      ids = ENV['COIN_PRICE'] || ['bitcoin'] if ids.empty?
+      ids = correct_id_from_symbol(ids)
       prices = client.price(ids)
       prices.each_key do |coin|
         puts "#{coin}: #{prices[coin]['usd']}"
@@ -46,6 +45,28 @@ module CoinPrice
 
     def all_coins
       @all_coins ||= client.coins_list
+    end
+
+    def correct_id_from_symbol(ids_or_symbols)
+      ids_or_symbols.map do |id_or_symbol|
+        cached_all_coins[id_or_symbol].nil? ? id_or_symbol : cached_all_coins[id_or_symbol]
+      end
+    end
+
+    def cached_all_coins
+      @cached_all_coins ||= begin
+        if ENV['coin_price_cached_all_coins'].nil?
+          puts "Writing to cache"
+          ENV['coin_price_cached_all_coins'] = all_coins.map do |coin_info|
+            "#{coin_info['id']},#{coin_info['symbol']}"
+          end.join("\n")
+        end
+
+        ENV['coin_price_cached_all_coins'].split("\n").each_with_object({}) do |data, result|
+          id, symbol = data.split(',')
+          result[symbol] = id
+        end
+      end
     end
   end
 end
