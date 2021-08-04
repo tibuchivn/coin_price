@@ -8,7 +8,7 @@ module CoinPrice
   class CLI < Thor
     desc 'Get coin price by ids', 'coin_price get bitcoin'
     def get(*ids)
-      ids = ENV['COIN_PRICE'] || ['bitcoin'] if ids.empty?
+      ids = default_coins if ids.empty?
       ids = correct_id_from_symbol(ids)
       prices = client.price(ids)
       prices.each_key do |coin|
@@ -34,6 +34,12 @@ module CoinPrice
     end
 
     private
+
+    def default_coins
+      return 'bitcoin' if ENV['COIN_PRICE'].nil? || ENV['COIN_PRICE'].strip.empty?
+
+      ENV['COIN_PRICE'].split(',')
+    end
 
     def print_coin_info(coin_info)
       puts "[#{coin_info['symbol']}] - #{coin_info['id']}"
