@@ -55,16 +55,8 @@ module CoinPrice
 
     def cached_all_coins
       @cached_all_coins ||= begin
-        if ENV['coin_price_cached_all_coins'].nil?
-          puts "Writing to cache"
-          ENV['coin_price_cached_all_coins'] = all_coins.map do |coin_info|
-            "#{coin_info['id']},#{coin_info['symbol']}"
-          end.join("\n")
-        end
-
-        ENV['coin_price_cached_all_coins'].split("\n").each_with_object({}) do |data, result|
-          id, symbol = data.split(',')
-          result[symbol] = id
+        all_coins.each_with_object({}) do |coin_info, result|
+          result[coin_info['symbol']] = coin_info['id']
         end
       end
     end
