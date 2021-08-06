@@ -61,10 +61,29 @@ module CoinPrice
 
     def cached_all_coins
       @cached_all_coins ||= begin
-        all_coins.each_with_object({}) do |coin_info, result|
-          result[coin_info['symbol']] = coin_info['id']
+        data_from_file = read_cache_file
+        data_from_file.each_with_object({}) do |coin_info, result|
+          symbol, id = coin_info.split(',')
+          result[symbol] = id
         end
       end
+    end
+
+    def read_cache_file
+      begin
+        File.read('coins.txt').split("\n")
+      rescue Errno::ENOENT
+        cache_data_to_file
+        retry
+      end
+    end
+
+    def cache_data_to_file
+      puts 'Caching ...'
+      coins = all_coins.map do |coin_info|
+        "#{coin_info['symbol']},#{coin_info['id']}"
+      end
+      File.open('coins.txt', 'wb') { |f| f.puts(coins) }
     end
   end
 end
