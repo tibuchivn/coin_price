@@ -71,7 +71,7 @@ module CoinPrice
 
     def read_cache_file
       begin
-        File.read('coins.txt').split("\n")
+        File.read(cache_file_location).split("\n")
       rescue Errno::ENOENT
         cache_data_to_file
         retry
@@ -83,7 +83,11 @@ module CoinPrice
       coins = all_coins.map do |coin_info|
         "#{coin_info['symbol']},#{coin_info['id']}"
       end
-      File.open('coins.txt', 'wb') { |f| f.puts(coins) }
+      File.open(cache_file_location, 'wb') { |f| f.puts(coins) }
+    end
+
+    def cache_file_location
+      @cache_file_location ||= "#{Dir.home}/.coins.txt"
     end
   end
 end
