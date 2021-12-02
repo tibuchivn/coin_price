@@ -11,7 +11,7 @@ module CoinPrice
       ids = default_coins if ids.empty?
       ids = correct_id_from_symbol(ids)
       prices = client.price(ids)
-      prices.each_key do |coin|
+      prices.sort_by {|key| key }.to_h.each_key do |coin|
         puts "#{coin}: #{prices[coin]['usd']}"
       end
     end
